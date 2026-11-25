@@ -58,4 +58,6 @@ Los estados del inventario son `available` y `borrowed`; los del préstamo `acti
 
 ## Comprobación de la decisión
 
-Verificar creación admin (201), catálogo autenticado (200), préstamo (201), préstamo duplicado (409), devolución (200), devolución duplicada (409), acceso sin token (401), creación por estudiante (403) y el checklist íntegro de regresión de libros. **No afirmar éxito hasta ejecutar los comandos y guardar capturas reales.**
+La decisión arquitectónica fue comprobada mediante pruebas reales. Verificamos el registro de laptops por parte del administrador (201), la consulta del inventario (200), el préstamo (201), el rechazo de préstamos duplicados (409), la devolución (200) y el rechazo de devoluciones repetidas (409).
+
+También comprobamos la seguridad mediante el rechazo de accesos sin token (401) y de creación de laptops por estudiantes (403). Finalmente, verificamos que el módulo original de libros continuara funcionando correctamente, incluyendo sus préstamos, devoluciones y actualización del inventario.**
