@@ -1,7 +1,5 @@
--- Esquema inicial del sistema de biblioteca
-
--- Fuerza charset UTF-8 en la importación inicial (evita caracteres corruptos
--- como "Cien aÃ±os de soledad" cuando el cliente MySQL importa con latin1)
+-- Esquema original de libros/usuarios: se conserva igual y solo se corrige
+-- el separador del INSERT final que venía mal en la rama main consultada.
 SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -12,7 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
   role ENUM('student', 'admin') NOT NULL DEFAULT 'student',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS books (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
@@ -24,7 +21,6 @@ CREATE TABLE IF NOT EXISTS books (
   available_copies INT NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS loans (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -36,12 +32,10 @@ CREATE TABLE IF NOT EXISTS loans (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (book_id) REFERENCES books(id)
 );
-
--- Datos de ejemplo para que la lista de libros no arranque vacía
 INSERT INTO books (title, author, isbn, category, cover_url, total_copies, available_copies) VALUES
 ('Cien años de soledad', 'Gabriel García Márquez', '9780307474728', 'Novela', '', 3, 3),
 ('Clean Code', 'Robert C. Martin', '9780132350884', 'Tecnología', '', 2, 2),
 ('El principito', 'Antoine de Saint-Exupéry', '9780156012195', 'Infantil', '', 4, 4),
 ('Sapiens', 'Yuval Noah Harari', '9780062316097', 'Historia', '', 2, 2),
-('The Pragmatic Programmer', 'Andrew Hunt', '9780135957059', 'Tecnología', '', 2, 2);
+('The Pragmatic Programmer', 'Andrew Hunt', '9780135957059', 'Tecnología', '', 2, 2),
 ('The Go Programming Language (Addison-Wesley Professional Computing Series) ', 'Alan Donovan', '', 'Tecnología', '', 2, 2);
