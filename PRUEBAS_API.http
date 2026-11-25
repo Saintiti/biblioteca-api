@@ -1,0 +1,146 @@
+# PRUEBAS_API.http — Abrir en VS Code con extensión REST Client (Huachao Mao).
+# Ejecutar EN ESTE ORDEN. No subir tokens reales al repositorio.
+# Antes del login admin, promover admin.laptops@example.com en MySQL según README_INSTALACION.md.
+@baseUrl = http://localhost:8080
+
+### 01 Salud (existente)
+GET {{baseUrl}}/health
+
+### 02 Ping (existente)
+GET {{baseUrl}}/ping
+
+### 03 Registrar administrador (inicialmente role=student)
+# @name registerAdmin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Administrador Laptop",
+  "email": "admin.laptops@example.com",
+  "password": "PruebaAdmin123!"
+}
+
+### 04 Registrar estudiante
+# @name registerStudent
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Estudiante Laptop",
+  "email": "estudiante.laptops@example.com",
+  "password": "PruebaStudent123!"
+}
+
+### 05 Login admin (SOLO DESPUÉS de actualizar rol por SQL)
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin.laptops@example.com",
+  "password": "PruebaAdmin123!"
+}
+
+### 06 Login estudiante
+# @name loginStudent
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "estudiante.laptops@example.com",
+  "password": "PruebaStudent123!"
+}
+
+### 07 Catálogo de libros existente — 200
+GET {{baseUrl}}/api/books
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 08 Préstamos de libros existentes — 200
+GET {{baseUrl}}/api/loans/me
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 09 Crear laptop (admin) — 201
+# @name crearLaptop
+POST {{baseUrl}}/api/laptops
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "serial_number": "UTB-LAP-TEST-0001",
+  "brand": "Lenovo",
+  "model": "ThinkPad E14"
+}
+
+### 10 Listar laptops (JWT) — 200
+GET {{baseUrl}}/api/laptops
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 11 Préstamo laptop estudiante — 201
+# @name prestarLaptop
+POST {{baseUrl}}/api/laptop-loans
+Authorization: Bearer {{loginStudent.response.body.token}}
+Content-Type: application/json
+
+{
+  "laptop_id": {{crearLaptop.response.body.id}}
+}
+
+### 12 Préstamo duplicado MISMA laptop — 409 (antes de devolver)
+POST {{baseUrl}}/api/laptop-loans
+Authorization: Bearer {{loginStudent.response.body.token}}
+Content-Type: application/json
+
+{
+  "laptop_id": {{crearLaptop.response.body.id}}
+}
+
+### 13 Mis préstamos de laptop — 200
+GET {{baseUrl}}/api/laptop-loans/me
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 14 Devolver laptop — 200
+PUT {{baseUrl}}/api/laptop-loans/{{prestarLaptop.response.body.id}}/return
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 15 Devolver nuevamente — 409
+PUT {{baseUrl}}/api/laptop-loans/{{prestarLaptop.response.body.id}}/return
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 16 Crear equipo SIN token — 401
+POST {{baseUrl}}/api/laptops
+Content-Type: application/json
+
+{
+  "serial_number": "UTB-FAIL-SIN-TOKEN",
+  "brand": "Dell",
+  "model": "Latitude"
+}
+
+### 17 Crear equipo como estudiante — 403
+POST {{baseUrl}}/api/laptops
+Authorization: Bearer {{loginStudent.response.body.token}}
+Content-Type: application/json
+
+{
+  "serial_number": "UTB-FAIL-STUDENT",
+  "brand": "Dell",
+  "model": "Latitude"
+}
+
+### 18 Préstamo de libros existente — 201 (usar libro ID=1 si tiene copias)
+# @name prestarLibro
+POST {{baseUrl}}/api/loans
+Authorization: Bearer {{loginStudent.response.body.token}}
+Content-Type: application/json
+
+{
+  "book_id": 1
+}
+
+### 19 Mis préstamos de libros — 200
+GET {{baseUrl}}/api/loans/me
+Authorization: Bearer {{loginStudent.response.body.token}}
+
+### 20 Devolver libro — 200
+PUT {{baseUrl}}/api/loans/{{prestarLibro.response.body.id}}/return
+Authorization: Bearer {{loginStudent.response.body.token}}
